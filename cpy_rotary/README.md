@@ -1,6 +1,8 @@
 # RotaryButton
 Event-oriented button class.
 
+[source](./rotarybutton.py)
+
 [Made with this in mind](https://www.adafruit.com/product/377)
 
 Offers events for a rotary encoder to help you structure responsive code.

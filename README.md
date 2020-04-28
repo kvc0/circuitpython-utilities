@@ -9,3 +9,7 @@ Lightweight timings and measurements you can leave disabled after development.
 
 ## [Memory Logging](./instrumentation/README.md#memory_logging)
 Detailed debug memory logging to track where memory is disappearing to.
+
+
+## [functional/rate_limited](./functional/README.md#rate_limited)
+Limit how often a method will be invoked despite calling it many times.

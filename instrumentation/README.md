@@ -4,6 +4,8 @@ Tools to help debug code and understand performance over time.
 ## Metrics
 Lightweight timings and measurements you can leave after development.
 
+[source](./metrics.py)
+
 Metrics apis respect a global `metrics_enabled` boolean to avoid all allocation and method invocations possible when 
 you disable them.  The runtime cost for disabled metrics imports, decorators and method invocations is zero or close
 to zero.
@@ -135,6 +137,8 @@ if __name__ == '__main__':
 
 ## memory_logging
 Enable/disable-able detailed debug memory logging.
+
+[source](./memory_logging.py)
 
 By calling `print_mem('imported foo')` after each import, or after instantiating some library you can dig into who is using all that memory.
 
