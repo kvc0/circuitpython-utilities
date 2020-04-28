@@ -132,3 +132,11 @@ def run():
 if __name__ == '__main__':
     run()
 ```
+
+## memory_logging
+Enable/disable-able detailed debug memory logging.
+
+By calling `print_mem('imported foo')` after each import, or after instantiating some library you can dig into who is using all that memory.
+
+When you're done, you can set `builtins.memory_logging_enabled = False` or just leave it unset and leave the logging code there for when you
+need to debug a regression...
