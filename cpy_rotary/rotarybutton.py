@@ -1,7 +1,7 @@
 import time
 
 # Default event list
-from metrics import timer
+from instrumentation.metrics import timer
 
 _do_nothing = tuple()
 
