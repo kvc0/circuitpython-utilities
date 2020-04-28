@@ -87,13 +87,15 @@ if metrics_enabled:
         """
         Call on a timer, like every 10 seconds or every 60 seconds.  Whatever tickles your fancy.
         """
-        start = time.monotonic_ns()
         global last_timer_reset
-        if start - last_timer_reset > target_seconds * 1000000000:
+        start = time.monotonic_ns()
+        elapsed_nanos = start - last_timer_reset
+        if (start - last_timer_reset) < (target_seconds * 1000000000):
             return
+        last_timer_reset = start
         print('\n\n--------------   Metrics   -------------------------------------------------------------------------------------------------')
         # Print out the recursive formatted timer stack
-        timer_stack[0].print()
+        timer_stack[0].print(elapsed_nanos / 1000000)
         timer_stack[0].reset()
 
         # Print out the literal measurements table
@@ -164,14 +166,9 @@ if metrics_enabled:
             """Called on the root node"""
             self.children.clear()
 
-        def print(self):
+        def print(self, elapsed_ms):
             # Root node
             # 123 characters wide
-            global last_timer_reset
-            now = time.monotonic_ns()
-            elapsed_ms = (now - last_timer_reset) / 1000000
-            last_timer_reset = now
-
             max_namewidth = max(child._namewidth(name) for name, child in self.children.items())
             header_format_string = '{{:{:d}s}} | {:>8s} | {:>8s} | {:>8s} | {:>8s} | {:>8s} | {:>6s}'
             step_1_format = header_format_string.format(max_namewidth, 'Avg (ms)', 'Min (ms)', 'Max (ms)', 'Count', 'Sum (s)', '%')
