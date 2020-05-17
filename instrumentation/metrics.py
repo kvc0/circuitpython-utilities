@@ -103,18 +103,25 @@ if metrics_enabled:
             maxname = max(len(name) for name in measurements)
             stackname_format = '{{:{}s}}'.format(maxname)
             # Print measurement header
-            header_preamble = '-------------  Measurements   '
-            print(f'\n{header_preamble}', end='')
+            print('\n-------------  Measurements   ', end='')
             for _ in range(maxname + 11*4):
                 print('-', end='')
             print()
             print('{{:>{}s}}'.format(maxname).format('Measurement'), end='')
-            print(f' | {"avg":>8s} | {"min":>8s} | {"max":>8s} | {"count":>8s}')
+            print(' | {avg:>8s} | {min:>8s} | {max:>8s} | {count:>8s}'.format(
+                avg='avg', min='min', max='max', count='count'
+            ))
 
             for name, stats in measurements.items():
-                print(f'{stackname_format.format(name)} | {stats.sum / stats.count:8.3f} | {stats.min:8.3f} | {stats.max:8.3f} | {stats.count:8d}')
+                print('{stackname} | {avg:8.3f} | {min:8.3f} | {max:8.3f} | {count:8d}'.format(
+                    stackname=stackname_format.format(name),
+                    avg=stats.sum / max(1, stats.count),
+                    min=stats.min,
+                    max=stats.max,
+                    count=stats.count,
+                ))
                 stats.reset()
-        print(f'\nMetrics report completed in {(time.monotonic_ns() - start) / 1000000}ms')
+        print('\nMetrics report completed in {}ms'.format((time.monotonic_ns() - start) / 1000000))
         print('----------------------------------------------------------------------------------------------------------------------------\n\n')
 
 
@@ -146,7 +153,12 @@ if metrics_enabled:
 
         def __str__(self):
             # 41 chars
-            return f'avg:{self.sum / self.count:8.3f}  min:{self.min:8.3f}  max:{self.max:8.3f}  count:{self.count:6d}'
+            return 'avg:{avg:8.3f}  min:{min:8.3f}  max:{max:8.3f}  count:{count:6d}'.format(
+                avg=self.sum / self.count,
+                min=self.min,
+                max=self.max,
+                count=self.count,
+            )
 
     class _TimerNode:
         def __init__(self, name):
@@ -179,7 +191,7 @@ if metrics_enabled:
                 print('-', end='')
             print()
 
-            print(f'Elapsed: {elapsed_ms / 1000:.1f} seconds')
+            print('Elapsed: {:.1f} seconds'.format(elapsed_ms / 1000))
             print(format_string)
             # By time spent descending
             for name, child in sorted(self.children.items(), key=lambda c: c[1].sum, reverse=True):
@@ -211,7 +223,12 @@ if metrics_enabled:
 
         def __str__(self):
             # 41 chars
-            return f'avg:{self.sum / self.count:8.3f}  min:{self.min:8.3f}  max:{self.max:8.3f}  count:{self.count:6d}'
+            return 'avg:{avg:8.3f}  min:{min:8.3f}  max:{max:8.3f}  count:{count:6d}'.format(
+                avg=self.sum / self.count,
+                min=self.min,
+                max=self.max,
+                count=self.count
+            )
 
 
     measurements = {}
