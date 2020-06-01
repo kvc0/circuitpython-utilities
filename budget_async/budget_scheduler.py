@@ -11,9 +11,11 @@ class BudgetScheduler:
 
     async def sleep(self, seconds):
         """
-        From within a coroutine
-        :param seconds:
-        :return:
+        From within a coroutine, this suspends your call stack for some amount of time.
+
+        NOTE:  Always `await` this!  You will have a bad time if you do not.
+
+        :param seconds: Floating point; will wait at least this long to call your task again.
         """
         assert self._current is not None, 'You can only sleep from within a task'
         self._sleeping.append((time.monotonic(), seconds, self._current))
@@ -26,14 +28,24 @@ class BudgetScheduler:
         # Don't yield in async methods; only await unless you're making a library.
         yield
 
-    def register(self, awaitable_task):
+    def add_task(self, awaitable_task):
+        """
+        Add a concurrent task (known as a coroutine, implemented as a generator in CircuitPython)
+        Use:
+          scheduler.add_task( my_async_method() )
+        :param awaitable_task:  The coroutine to be driven to completion.
+        """
         self._tasks.append(awaitable_task)
 
     def __next__(self):
         """
-        Runs tasks one step.  Do next(scheduler) in your main loop().
-        Exceptions that reach the runner break out; other than the crucial StopIteration exception,
-          which signifies the end of a task and its materialized result.
+        Runs tasks one step.
+        Use:
+            def main_loop():
+              while True:
+                next(scheduler)
+        The crucial StopIteration exception signifies the end of a coroutine in CurcuitPython.
+        Other Exceptions that reach the runner break out, stopping your app and showing a stack trace.
         """
         assert self._current is None, 'BudgetScheduler can only be advanced by 1 stack frame at a time.'
         for _ in range(len(self._tasks)):
@@ -51,6 +63,9 @@ class BudgetScheduler:
                 break
 
     def _run_task(self, task):
+        """
+        Runs a task and re-queues for the next loop if it is both (1) not complete and (2) not sleeping.
+        """
         self._current = task
         try:
             next(task)
