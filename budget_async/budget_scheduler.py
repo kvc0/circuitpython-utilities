@@ -68,7 +68,7 @@ class BudgetScheduler:
         """
         self._current = task
         try:
-            next(task)
+            task.send(None)
             # Sleep gate here, in case the current task suspended.
             # If a sleeping task re-suspends it will have already put itself in the sleeping queue.
             if self._current is not None:
