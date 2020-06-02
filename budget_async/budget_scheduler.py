@@ -9,6 +9,15 @@ class BudgetScheduler:
         self._sleeping = []
         self._current = None
 
+    class _CallMeNextTime:
+        def __await__(self):
+            # For CPython
+            yield
+
+        def __iter__(self):
+            # For Circuitpython
+            yield
+
     async def sleep(self, seconds):
         """
         From within a coroutine, this suspends your call stack for some amount of time.
@@ -26,7 +35,7 @@ class BudgetScheduler:
         #   control back out through user code and up to the scheduler's
         #   __iter__ stack which will see that we've suspended _current.
         # Don't yield in async methods; only await unless you're making a library.
-        yield
+        await BudgetScheduler._CallMeNextTime()
 
     def add_task(self, awaitable_task):
         """
