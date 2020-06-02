@@ -10,13 +10,10 @@ class BudgetScheduler:
         self._current = None
 
     class _CallMeNextTime:
-        def __await__(self):
-            # For CPython
+        def __iter__(self):
             yield
 
-        def __iter__(self):
-            # For Circuitpython
-            yield
+        __await__ = __iter__
 
     async def sleep(self, seconds):
         """
@@ -27,15 +24,16 @@ class BudgetScheduler:
         :param seconds: Floating point; will wait at least this long to call your task again.
         """
         assert self._current is not None, 'You can only sleep from within a task'
-        self._sleeping.append((time.monotonic(), seconds, self._current))
-        self._sleeping.sort(key=lambda t: t[0] + t[1])  # heap would be better but hey this is budget.
-        self._current = None
         # This is inside the scheduler where we know generator yield is the
         #   implementation of task switching in CircuitPython.  This throws
         #   control back out through user code and up to the scheduler's
         #   __iter__ stack which will see that we've suspended _current.
         # Don't yield in async methods; only await unless you're making a library.
-        await BudgetScheduler._CallMeNextTime()
+        delayed_continuation = BudgetScheduler._CallMeNextTime()
+        self._sleeping.append((time.monotonic(), seconds, self._current))
+        self._sleeping.sort(key=lambda t: t[0] + t[1])  # heap would be better but hey this is budget.
+        self._current = None
+        await delayed_continuation  # Pretty subtle here.  This class yields once, then it continues.  This is the yield
 
     def add_task(self, awaitable_task):
         """
