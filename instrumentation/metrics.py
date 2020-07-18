@@ -41,6 +41,24 @@ def timer(name):
         return arg_wrapper
 
 
+def atimer(name):
+    """
+    @Decorator
+    Record milliseconds per invocation when started with metrics_enabled.
+    @:param name A string name for the function to be decorated.
+    """
+    if type(name) is str:
+        def arg_wrapper(function):
+            if not metrics_enabled:
+                #  No runtime cost when metrics are disabled
+                return function
+
+            async def wrapper(*args, **kwargs):
+                with Timer(name):
+                    return await function(*args, **kwargs)
+            return wrapper
+        return arg_wrapper
+
 
 if metrics_enabled:
     def measure(name, observation):
@@ -181,6 +199,9 @@ if metrics_enabled:
         def print(self, elapsed_ms):
             # Root node
             # 123 characters wide
+            if len(self.children) == 0:
+                print('no timers encountered')
+                return
             max_namewidth = max(child._namewidth(name) for name, child in self.children.items())
             header_format_string = '{{:{:d}s}} | {:>8s} | {:>8s} | {:>8s} | {:>8s} | {:>8s} | {:>6s}'
             step_1_format = header_format_string.format(max_namewidth, 'Avg (ms)', 'Min (ms)', 'Max (ms)', 'Count', 'Sum (s)', '%')

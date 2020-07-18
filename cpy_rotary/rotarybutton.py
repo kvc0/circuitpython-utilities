@@ -1,7 +1,7 @@
 import time
 
 # Default event list
-from instrumentation.metrics import timer
+from instrumentation.metrics import timer, atimer
 
 _do_nothing = tuple()
 
@@ -38,8 +38,8 @@ class RotaryButton:
         self._current_press_start = None
         self._longheld = False
 
-    @timer('rotary')
-    def loop(self):
+    @atimer('rotary')
+    async def loop(self):
         self._button.update()  # for debounce.  Inspect .rose and .fell for press/release events
         self._update_rotary_position()
         self._update_button()
